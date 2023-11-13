@@ -1,0 +1,47 @@
+[
+    {
+        "humidity": "90.00",
+        "temperature": "30.00",
+        "timestamp": "2023-11-13 15:28:18"
+    },
+    {
+        "humidity": "89.00",
+        "temperature": "30.10",
+        "timestamp": "2023-11-13 15:28:24"
+    },
+    {
+        "humidity": "88.00",
+        "temperature": "30.10",
+        "timestamp": "2023-11-13 15:28:30"
+    },
+    {
+        "humidity": "88.00",
+        "temperature": "30.10",
+        "timestamp": "2023-11-13 15:28:37"
+    },
+    {
+        "humidity": "88.00",
+        "temperature": "30.10",
+        "timestamp": "2023-11-13 15:28:43"
+    },
+    {
+        "humidity": "87.00",
+        "temperature": "30.10",
+        "timestamp": "2023-11-13 15:28:49"
+    },
+    {
+        "humidity": "87.00",
+        "temperature": "30.10",
+        "timestamp": "2023-11-13 15:28:55"
+    },
+    {
+        "humidity": "87.00",
+        "temperature": "30.00",
+        "timestamp": "2023-11-13 15:29:01"
+    },
+    {
+        "humidity": "88.00",
+        "temperature": "30.00",
+        "timestamp": "2023-11-13 15:29:07"
+    }
+]

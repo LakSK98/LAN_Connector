@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Sensor Data Dashboard</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            text-align: center;
+        }
+
+        #sensorData {
+            border-radius: 10px;
+            margin: 20px auto;
+            width: 80%;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border: 2px solid #3498db; /* Highlight color */
+            padding-top: 20px;
+			padding-bottom: 20px;
+            transition: background-color 0.5s ease; /* Smooth transition for background color change */
+        }
+
+        #sensorHistory {
+            margin: 20px auto;
+            width: 80%;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow-x: auto; /* Add horizontal scroll if needed */
+        }
+
+        #sensorHistory table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed; /* Fixed layout to make columns equal width */
+            white-space: nowrap; /* Prevent text wrapping in cells */
+        }
+
+        #sensorHistory th, #sensorHistory td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        #sensorHistory th {
+            background-color: #666666; /* Match with page title background color */
+            color: #ffffff; /* Match with page title text color */
+            font-weight: bold;
+            font-size: large;
+        }
+
+        #sensorHistory h2 {
+            text-align: center; /* Center the table title */
+            margin-top: 10px;
+        }
+
+        .sensorReading {
+            margin-bottom: 20px;
+        }
+
+        h1.humidity,
+        h1.temperature {
+            font-size: 24px;
+        }
+
+        .fa {
+            font-size: 36px;
+            margin-right: 10px;
+        }
+
+        /* Responsive Styles */
+        @media only screen and (max-width: 800px) {
+            #sensorData {
+                width: 90%;
+            }
+
+            #sensorHistory th:nth-child(1),
+            #sensorHistory td:nth-child(1) {
+                display: none;
+            }
+        }
+
+        @media only screen and (max-width: 480px) {
+            #sensorData {
+                width: 95%;
+            }
+        }
+
+        /* Danger background color for out-of-range values */
+        .danger {
+            background-color: #e74c3c; /* Red background color for danger */
+            color: #ffffff; /* White text color for visibility */
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Real-time Sensor Data Dashboard</h1>
+</header>
+
+<div id="sensorData"></div>
+
+<div id="sensorHistory">
+    <h2>Sensor Data History</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Humidity (%)</th>
+                <th>Temperature (°C)</th>
+            </tr>
+        </thead>
+        <tbody id="historyTableBody"></tbody>
+    </table>
+</div>
+
+<script>
+    function fetchData() {
+        var phpScriptURL = 'http://localhost/lan/read_data.php';
+
+        $.ajax({
+            url: phpScriptURL,
+            method: 'GET',
+            success: function(data) {
+                displayCurrentData(data);
+                displayHistoryData(data);
+            },
+            complete: function() {
+                setTimeout(fetchData, 1000);
+            }
+        });
+    }
+
+    function displayCurrentData(data) {
+        var lastRecord = data[data.length - 1];
+        var sensorDataDiv = $('#sensorData');
+
+        // Check if values are within the preferred range
+        var isHumidityDanger = lastRecord.humidity < 30 || lastRecord.humidity > 90;
+        var isTemperatureDanger = lastRecord.temperature < 10 || lastRecord.temperature > 40;
+
+        // Add danger class if values are out of range
+        if (isHumidityDanger || isTemperatureDanger) {
+            sensorDataDiv.addClass('danger');
+        } else {
+            sensorDataDiv.removeClass('danger');
+        }
+
+        sensorDataDiv.html(
+            '<h1 class="sensorReading humidity"><i class="fa fa-tint" aria-hidden="true"></i> Humidity: ' + lastRecord.humidity + '%</h1>' +
+            '<h1 class="sensorReading temperature"><i class="fa fa-thermometer-half"></i> Temperature: ' + lastRecord.temperature + '°C</h1>'
+        );
+    }
+
+    function displayHistoryData(data) {
+		$('#historyTableBody').empty(); // Clear existing rows
+
+		data.forEach(function(record, index) {
+			// Check if values are within the preferred range
+			var isHumidityDanger = record.humidity < 30 || record.humidity > 90;
+			var isTemperatureDanger = record.temperature < 10 || record.temperature > 40;
+
+			// Check if either humidity or temperature is in the danger range
+			var isDanger = isHumidityDanger || isTemperatureDanger;
+
+			var tableRow = '<tr' + (isDanger ? ' class="danger"' : '') + '>' +
+				'<td>' + (window.innerWidth <= 800 ? new Date(record.timestamp).toLocaleDateString() : new Date(record.timestamp).toLocaleString()) + '</td>' +
+				'<td>' + record.humidity + '</td>' +
+				'<td>' + record.temperature + '</td>' +
+				'</tr>';
+
+			$('#historyTableBody').append(tableRow);
+		});
+	}
+
+    $(document).ready(function() {
+        fetchData();
+    });
+</script>
+
+</body>
+</html>
